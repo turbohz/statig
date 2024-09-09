@@ -85,17 +85,17 @@ where
 
     /// Handle an event. If the state machine is still uninitialized, it will be initialized
     /// before handling the event.
-    pub async fn handle(&mut self, event: &M::Event<'_>)
+    pub async fn handle(&mut self, event: &M::Event<'_>) -> Result<&M::State,&M::State>
     where
         for<'evt> M::Event<'evt>: Send + Sync,
         for<'ctx> M: IntoStateMachine<Context<'ctx> = ()>,
     {
-        self.handle_with_context(event, &mut ()).await;
+        self.handle_with_context(event, &mut ()).await
     }
 
     /// Handle an event. If the state machine is still uninitialized, it will be initialized
     /// before handling the event.
-    pub async fn handle_with_context(&mut self, event: &M::Event<'_>, context: &mut M::Context<'_>)
+    pub async fn handle_with_context(&mut self, event: &M::Event<'_>, context: &mut M::Context<'_>) -> Result<&M::State,&M::State>
     where
         for<'ctx> M::Context<'ctx>: Send + Sync,
         for<'evt> M::Event<'evt>: Send + Sync,
@@ -104,25 +104,25 @@ where
             self.inner.async_init_with_context(context).await;
             self.initialized = true;
         }
-        self.inner.async_handle_with_context(event, context).await;
+        self.inner.async_handle_with_context(event, context).await.map(|_|self.state()).ok_or_else(||self.state())
     }
 
-    pub async fn step(&mut self)
+    pub async fn step(&mut self) -> Result<&M::State,&M::State>
     where
         for<'evt, 'ctx> M: IntoStateMachine<Event<'evt> = (), Context<'ctx> = ()>,
         for<'evt> M::Event<'evt>: Send + Sync,
         for<'ctx> M::Context<'ctx>: Send + Sync,
     {
-        self.handle_with_context(&(), &mut ()).await;
+        self.handle_with_context(&(), &mut ()).await
     }
 
-    pub async fn step_with_context(&mut self, context: &mut M::Context<'_>)
+    pub async fn step_with_context(&mut self, context: &mut M::Context<'_>) -> Result<&M::State,&M::State>
     where
         for<'evt> M: IntoStateMachine<Event<'evt> = ()>,
         for<'evt> M::Event<'evt>: Send + Sync,
         for<'ctx> M::Context<'ctx>: Send + Sync,
     {
-        self.handle_with_context(&(), context).await;
+        self.handle_with_context(&(), context).await
     }
 
     /// Get the current state.
@@ -245,41 +245,41 @@ where
     for<'sub> M::Superstate<'sub>: awaitable::Superstate<M> + Send,
 {
     /// Handle the given event.
-    pub async fn handle(&mut self, event: &M::Event<'_>)
+    pub async fn handle(&mut self, event: &M::Event<'_>) -> Result<&M::State,&M::State>
     where
         for<'ctx> M: IntoStateMachine<Context<'ctx> = ()>,
         for<'evt> M::Event<'evt>: Send + Sync,
         for<'ctx> M::Context<'ctx>: Send + Sync,
     {
-        self.handle_with_context(event, &mut ()).await;
+        self.handle_with_context(event, &mut ()).await
     }
 
     /// Handle the given event.
-    pub async fn handle_with_context(&mut self, event: &M::Event<'_>, context: &mut M::Context<'_>)
+    pub async fn handle_with_context(&mut self, event: &M::Event<'_>, context: &mut M::Context<'_>) -> Result<&M::State,&M::State>
     where
         M: IntoStateMachine,
         for<'evt> M::Event<'evt>: Send + Sync,
         for<'ctx> M::Context<'ctx>: Send + Sync,
     {
-        self.inner.async_handle_with_context(event, context).await;
+        self.inner.async_handle_with_context(event, context).await.map(|_|self.state()).ok_or_else(||self.state())
     }
 
     /// This is the same as `handle(())` in the case `Event` is of type `()`.
-    pub async fn step(&mut self)
+    pub async fn step(&mut self) -> Result<&M::State,&M::State>
     where
         for<'evt, 'ctx> M: IntoStateMachine<Event<'evt> = (), Context<'ctx> = ()>,
     {
-        self.handle(&()).await;
+        self.handle(&()).await
     }
 
     /// This is the same as `handle(())` in the case `Event` is of type `()`.
-    pub async fn step_with_context(&mut self, context: &mut M::Context<'_>)
+    pub async fn step_with_context(&mut self, context: &mut M::Context<'_>) -> Result<&M::State,&M::State>
     where
         for<'evt> M: IntoStateMachine<Event<'evt> = ()>,
         for<'evt> M::Event<'evt>: Send + Sync,
         for<'ctx> M::Context<'ctx>: Send + Sync,
     {
-        self.handle_with_context(&(), context).await;
+        self.handle_with_context(&(), context).await
     }
 
     /// Get an immutable reference to the current state of the state machine.

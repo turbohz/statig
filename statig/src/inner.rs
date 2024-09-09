@@ -26,13 +26,16 @@ where
     }
 
     /// Handle the given event.
-    pub fn handle_with_context(&mut self, event: &M::Event<'_>, context: &mut M::Context<'_>) {
+    pub fn handle_with_context(&mut self, event: &M::Event<'_>, context: &mut M::Context<'_>) -> Option<()> {
         let response = self.state.handle(&mut self.shared_storage, event, context);
         match response {
-            Response::Super => {}
-            Response::Handled => {}
-            Response::Rejected => {}
-            Response::Transition(state) => self.transition(state, context),
+            Response::Super => Some(()),
+            Response::Handled => Some(()),
+            Response::Rejected => None,
+            Response::Transition(state) => {
+                self.transition(state, context);
+                Some(())
+            },
         }
     }
 
@@ -76,16 +79,19 @@ where
         &mut self,
         event: &M::Event<'_>,
         context: &mut M::Context<'_>,
-    ) {
+    ) -> Option<()> {
         let response = self
             .state
             .handle(&mut self.shared_storage, event, context)
             .await;
         match response {
-            Response::Super => {}
-            Response::Handled => {}
-            Response::Rejected => {}
-            Response::Transition(state) => self.async_transition(state, context).await,
+            Response::Super => Some(()),
+            Response::Handled => Some(()),
+            Response::Rejected => None,
+            Response::Transition(state) => {
+                self.async_transition(state, context).await;
+                Some(())
+            }
         }
     }
 
