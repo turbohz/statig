@@ -8,6 +8,8 @@ pub enum Response<S> {
     Super,
     /// Transition to the given state.
     Transition(S),
+    /// Consider the event rejected.
+    Rejected,
 }
 
 impl<S> Debug for Response<S>
@@ -22,6 +24,7 @@ where
                 .debug_tuple("Transition")
                 .field(state as &dyn Debug)
                 .finish(),
+            Self::Rejected => f.debug_tuple("Rejected").finish()
         }
     }
 }

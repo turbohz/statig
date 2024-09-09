@@ -117,6 +117,7 @@ where
 
             match response {
                 Response::Handled => Response::Handled,
+                Response::Rejected => Response::Rejected,
                 Response::Super => match self.superstate() {
                     Some(mut superstate) => {
                         M::ON_DISPATCH(

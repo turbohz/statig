@@ -31,6 +31,7 @@ where
         match response {
             Response::Super => {}
             Response::Handled => {}
+            Response::Rejected => {}
             Response::Transition(state) => self.transition(state, context),
         }
     }
@@ -83,6 +84,7 @@ where
         match response {
             Response::Super => {}
             Response::Handled => {}
+            Response::Rejected => {}
             Response::Transition(state) => self.async_transition(state, context).await,
         }
     }
